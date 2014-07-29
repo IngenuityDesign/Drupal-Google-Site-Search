@@ -473,7 +473,7 @@ class GoogleSiteSearch {
     }
 
     if(variable_get('gss_number_of_results', TRUE) == 1 && $totalResults !== 0) {
-      $html .= t('Shows @show_start to @show_end of approximately @totalResults hits', array('@show_start' => $show_start, '@show_end' => $show_end, '@totalResults' => $totalResults));
+      $html .= t('Showing @show_start to @show_end of approximately @totalResults', array('@show_start' => $show_start, '@show_end' => $show_end, '@totalResults' => $totalResults));
     }
 
     $html .= '</div>';
