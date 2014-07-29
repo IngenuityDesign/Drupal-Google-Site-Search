@@ -302,12 +302,28 @@ class GoogleSiteSearch {
 
         $this->totalResults = intval($results->searchInformation->totalResults);
         // return results
-        return  $this->processReturnedItems( $results->items );
+        return array_merge( $this->processPromotions($results->promotions), $this->processReturnedItems( $results->items ) );
       }
     }
     else {
       throw new Exception('Could not load search results from Google.');
     }
+  }
+
+  private function processPromotions( $promotions ) {
+      $return_promotions = array();
+
+      foreach( $promotions as $promotion ) {
+          $aPromotion = array();
+          $aPromotion['title'] = $promotion->title;
+          $aPromotion['description'] = $promotion->bodyLines[0]->title;
+          if ($promotion->image && $promotion->image->source) $aPromotion['thumbnail_url'] = $promotion->image->source;
+          if ($promotion->link) $aPromotion['url'] = $promotion->link;
+
+          $return_promotions[] = $aPromotion;
+      }
+
+      return $return_promotions;
   }
 
   private function processReturnedItems( $items ) {
