@@ -1,17 +1,23 @@
 <?php
 
 // Defines the Google site search base url.
-define('GSS_BASE_URL', 'http://www.google.com/search');
+define('GSS_BASE_URL', 'https://www.googleapis.com/customsearch/v1?');
 /**
  * Class for interaction with Google Site Search.
  */
 class GoogleSiteSearch {
 
   /**
-   * The Google key to use.
+   * The Google API key to use.
    * @var string
    */
   private $key = NULL;
+
+  /**
+   * The Google custom search identifier.
+   * @var string
+   */
+  private $cx = NULL;
 
   /**
    * The language to use in the search.
@@ -35,7 +41,7 @@ class GoogleSiteSearch {
    * Page size, number of results per page.
    * @var int
    */
-  private $pageSize = 20;
+  private $pageSize = 10; //this is max allowed
 
   /**
    * Pager size, number of pages to show in the pager.
@@ -78,7 +84,7 @@ class GoogleSiteSearch {
    *
    * @param string
    */
-  public function __construct($query, $key = NULL, $pageSize = 20, $extraParams = NULL) {
+  public function __construct($query, $key = NULL, $pageSize = 10, $extraParams = NULL) {
     $this->query = $query;
     $this->key = $key;
     $this->pageSize = $pageSize;
@@ -103,6 +109,25 @@ class GoogleSiteSearch {
   public function GetKey() {
     return $this->key;
   }
+
+   /**
+    * Set Search Engine id.
+    *
+    * @param string $cx The Search engine ctx.
+    * @return void
+    */
+   public function SetCx($cx) {
+       $this->cx = $cx;
+   }
+
+   /**
+    * Get search engine ID
+    *
+    * @return string The search engine ID.
+    */
+   public function GetCx() {
+       return $this->cx ? $this->cx : '014366604052550022523:maniez6j9mw';
+   }
 
   /**
    * Set the language.
@@ -219,27 +244,30 @@ class GoogleSiteSearch {
     $this->currentPage = $page;
 
     // calculate start postition based on page
-    $startPos = ($this->currentPage - 1) * $this->pageSize;
+    $startPos = (($this->currentPage - 1) * $this->pageSize) + 1;
 
     $params = array(
-      'query' => array(
+        'key'   => $this->GetKey(),
+        'cx'    => $this->GetCX(),
+        'alt'   => 'json',
+        'userIp'    => $_SERVER['REMOTE_ADDR'],
+
+        //api specific parameters
         'start' => $startPos,
         'num' => $this->pageSize,
-        'client' => 'google-csbe',
-        'output' => 'xml_no_dtd',
-        'cx' => $this->key,
-        'q' => $this->query,
-      )
+
+        'q' => $this->query
+
     );
     
     // Add language parameter if is set.
     if ($this->language) {
-      $params['query']['hl'] = $this->language;
+      $params['hl'] = $this->language;
     }
      
     // prepare query parameters for URL assembly
     if (count($this->extraParams) > 0) {
-      $params['query']  = array_merge($params['query'], $this->extraParams);
+      $params = array_merge($params, $this->extraParams);
     }
     else {
       $extraParamsQuery = NULL;
@@ -249,8 +277,10 @@ class GoogleSiteSearch {
     $search_base_url = variable_get('gss_base_url', '');
     $search_base_url = !empty($search_base_url) ? $search_base_url : GSS_BASE_URL;
 
+      die(url($search_base_url, array('query' => $params)));
+
     // fetch results from google
-    $url_response = drupal_http_request(url($search_base_url, $params));
+    $url_response = drupal_http_request(url($search_base_url, array('query' => $params)));
 
     if (isset($url_response->error)) {
       return NULL;
