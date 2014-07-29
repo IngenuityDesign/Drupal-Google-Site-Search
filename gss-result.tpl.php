@@ -44,27 +44,21 @@
  * @see template_preprocess_gss_result()
  */
  ?>
-<li class="<?php print $classes; ?>"<?php print $attributes; ?>>
-  <?php print render($title_prefix); ?>
-  <h3 class="gss-title"<?php print $title_attributes; ?>>
-    <a href="<?php print $url; ?>"><?php print $title; ?></a>
-  </h3>
-  <?php if ($thumbnail_url): ?>
-    <img class="gss-thumbnail-image" src="<?php print $thumbnail_url; ?>" height="62"/>
-  <?php endif; ?>
-  <?php print render($title_suffix); ?>
-  <div class="gss-search-snippet-info">
-    <?php if ($snippet) : ?>
-      <p class="gss-search-snippet"<?php print $content_attributes; ?>><?php print $snippet; ?></p>
-    <?php endif; ?>
-    <?php if ($url) : ?>
-      <p class="gss-search-url"><a href="<?php print $url; ?>"><?php print $url; ?></a></p>
-    <?php endif; ?>
-    <?php if ($show_info && $info): ?>
-      <p class="gss-info">
-        <?php print $info; ?>
-      </p>
-    <?php endif; ?>
-  </div>
-
+<li class="<?php print $classes; ?> media"<?php print $attributes; ?>>
+    <a href="<?php print $url ?>">
+        <?php if ($thumbnail_url): ?>
+        <figure class="pull-left">
+            <img class="thumbnail gss-thumbnail-image" src="<?php print $thumbnail_url; ?>" width="62"/>
+        </figure>
+        <?php endif; ?>
+        <div class="media-body gss-body">
+            <?php print render($title_prefix); ?>
+            <h3 class="gss-title media-heading"<?php print $title_attributes; ?>>
+                <?php print $title ?>
+            </h3>
+            <?php if ($snippet) : ?>
+                <p class="gss-search-snippet"<?php print $content_attributes; ?>><?php print $snippet; ?></p>
+            <?php endif; ?>
+        </div>
+    </a>
 </li>

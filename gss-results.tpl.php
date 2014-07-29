@@ -19,7 +19,7 @@
  */
 ?>
 <span><?php print $head; ?></span>
-<ol class="google-search-results">
+<ol class="google-search-results media-list">
   <?php print $search_results; ?>
 </ol>
 <?php print $pager; ?>
