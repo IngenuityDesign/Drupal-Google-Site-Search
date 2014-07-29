@@ -156,7 +156,7 @@ function gss_search_results($query) {
   // Make query safe.
   $query = htmlspecialchars($query, ENT_NOQUOTES, 'UTF-8');
   // Init GoogleSiteSearch object.
-  $gss = new GoogleSiteSearch($query, variable_get('gss_api_key', ''), 10, $extra);
+  $gss = new GoogleSiteSearch($query, variable_get('gss_api_key', ''), variable_get('gss_cx_key', ''), 10, $extra);
   // Get current page.
   $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
   // Init results variable.

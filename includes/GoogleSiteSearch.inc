@@ -84,10 +84,11 @@ class GoogleSiteSearch {
    *
    * @param string
    */
-  public function __construct($query, $key = NULL, $pageSize = 10, $extraParams = NULL) {
+  public function __construct($query, $key = NULL, $cx = NULL, $pageSize = 10, $extraParams = NULL) {
     $this->query = $query;
-    $this->key = $key;
-    $this->pageSize = $pageSize;
+    $this->SetCx($cx);
+    $this->SetKey($key);
+    $this->SetPageSize($pageSize);
     $this->extraParams = $extraParams;
   }
 
@@ -126,7 +127,7 @@ class GoogleSiteSearch {
     * @return string The search engine ID.
     */
    public function GetCx() {
-       return $this->cx ? $this->cx : '014366604052550022523:maniez6j9mw';
+       return $this->cx;
    }
 
   /**
@@ -146,6 +147,8 @@ class GoogleSiteSearch {
    * @return void
    */
   public function SetPageSize($pageSize) {
+    if ($pageSize > 10) $pageSize = 10;
+    if ($pageSize < 1) $pageSize = 1;
     $this->pageSize = $pageSize;
   }
 
@@ -277,75 +280,56 @@ class GoogleSiteSearch {
     $search_base_url = variable_get('gss_base_url', '');
     $search_base_url = !empty($search_base_url) ? $search_base_url : GSS_BASE_URL;
 
-      die(url($search_base_url, array('query' => $params)));
-
+    $API_Url = url($search_base_url, array('query' => $params));
     // fetch results from google
-    $url_response = drupal_http_request(url($search_base_url, array('query' => $params)));
+    $url_response = drupal_http_request($API_Url, array(
+        'method' => 'GET',
+        'max_redirects' => 1
+    ));
 
     if (isset($url_response->error)) {
       return NULL;
     }
-    $results = simplexml_load_string($url_response->data);
+    $results = json_decode($url_response->data);
 
     if ($results !== FALSE) {
-      if (!isset($results->RES->M)) {
+      if (!isset($results->items) || count($results->items) < 1) {
         // no results, return NULL
         return NULL;
       }
       else {
         // save total results
-        $this->totalResults = intval(check_plain((string) $results->RES->M));
 
-        // store faceted items in order to use them later in the header
-        $categories = array();
-        if (isset($results->Context->Facet->FacetItem)) {
-          foreach ($results->Context->Facet->FacetItem as $facet) {
-            $categories[] = array(
-              'label' => check_plain((string) $facet->label),
-              'anchor_text' => check_plain((string) $facet->anchor_text),
-            );
-          }
-          $this->categories = $categories;
-        }
-        
-        // init results array
-        $arr = array();
-
-        // loop results
-        foreach ($results->RES->R as $result) {
-          // init result array
-          $item = array();
-          $item['title'] = filter_xss((string) $result->T, $this->GetAllowedTags());
-          $item['url'] = check_url((string) $result->UE);
-          $item['description'] = filter_xss((string) $result->S, $this->GetAllowedTags());
-          // let's get the image thumbnail - present in PageMap->DataObject['type'] == cse_thumbnail
-          if (isset($result->PageMap->DataObject)) {
-            foreach ($result->PageMap->DataObject as $do) {
-              switch ((string) $do['type']) {
-                case 'cse_thumbnail':
-                  //we are inside the thumbnail node, lets get the src attribute:
-                  foreach ($do->Attribute as $att) {
-                    switch ((string) $att['name']) {
-                      case 'src':
-                        $item['thumbnail_url'] = check_url((string) $att['value']);
-                        break;
-                    }
-                  }
-                  break;
-              }
-            }
-          }
-
-          $arr[] = $item;
-        }
-
+        $this->totalResults = intval($results->searchInformation->totalResults);
         // return results
-        return $arr;
+        return  $this->processReturnedItems( $results->items );
       }
     }
     else {
       throw new Exception('Could not load search results from Google.');
     }
+  }
+
+  private function processReturnedItems( $items ) {
+
+      $return_items = array();
+
+      foreach( $items as $item ) {
+          $anItem = array();
+          $anItem['title'] = filter_xss((string) $item->title, $this->GetAllowedTags());
+          $anItem['url'] = check_url((string) $item->link);
+          $anItem['htmlUrl'] = $item->htmlFormattedUrl;
+          $anItem['description'] = filter_xss((string) $item->htmlSnippet, $this->GetAllowedTags());
+          if (isset($item->pagemap) && isset($item->pagemap->cse_thumbnail)) {
+              $thumb = $item->pagemap->cse_thumbnail;
+              $anItem['thumbnail_url'] = $thumb[0]->src;
+          }
+
+          $return_items[] = $anItem;
+
+      }
+      return $return_items;
+
   }
 
   /**
