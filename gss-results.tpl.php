@@ -18,8 +18,10 @@
  * @see template_preprocess_gss_results()
  */
 ?>
-<span><?php print $head; ?></span>
-<ol class="google-search-results media-list">
-  <?php print $search_results; ?>
-</ol>
-<?php print $pager; ?>
+<div id="search-results">
+    <span><?php print $head; ?></span>
+    <ol class="google-search-results media-list">
+      <?php print $search_results; ?>
+    </ol>
+    <?php print $pager; ?>
+</div>

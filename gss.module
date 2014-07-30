@@ -202,6 +202,7 @@ function gss_search_results($query) {
         'title' => $result['title'],
         'thumbnail_url' => $result['thumbnail_url'],
         'snippet' => $result['description'],
+        'date' => $result['info'],
       );
     }
   }

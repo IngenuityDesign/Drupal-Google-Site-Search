@@ -26,6 +26,7 @@ function template_preprocess_gss_result(&$variables) {
   $variables['info_split'] = array();
   $variables['info'] = '';
   $variables['show_info'] = FALSE;
+  $variables['date'] = $result['date'] ? date('F j, Y', $result['date']) : false;
   $url = parse_url($result['link']);
   $url = trim($url['path'], '/');
   $languages = array_keys(language_list());
@@ -57,9 +58,12 @@ function template_preprocess_gss_result(&$variables) {
       'user' => $user_name,
       'date' => format_date($node->created, 'short'),
     );
+      $variables['date'] = date('F j, Y', $node->created);
     $variables['info_split'] = $info;
     $variables['info'] = implode(' | ', $info);
     $variables['show_info'] = variable_get('gss_info', FALSE);
+  } else {
+      //not loading
   }
 }
 

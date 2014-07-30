@@ -315,6 +315,7 @@ class GoogleSiteSearch {
 
       foreach( $promotions as $promotion ) {
           $aPromotion = array();
+          $aPromotion['info'] = $promotion->pagemap->Item[0]->date ? strtotime($item->pagemap->Item[0]->date) : false;
           $aPromotion['title'] = $promotion->title;
           $aPromotion['description'] = $promotion->bodyLines[0]->title;
           if ($promotion->image && $promotion->image->source) $aPromotion['thumbnail_url'] = $promotion->image->source;
@@ -332,6 +333,7 @@ class GoogleSiteSearch {
 
       foreach( $items as $item ) {
           $anItem = array();
+          $anItem['info'] = $item->pagemap->Item[0]->date ? strtotime($item->pagemap->Item[0]->date) : false;
           $anItem['title'] = filter_xss((string) $item->title, $this->GetAllowedTags());
           $anItem['url'] = check_url((string) $item->link);
           $anItem['htmlUrl'] = $item->htmlFormattedUrl;
@@ -340,7 +342,6 @@ class GoogleSiteSearch {
               $thumb = $item->pagemap->cse_thumbnail;
               $anItem['thumbnail_url'] = $thumb[0]->src;
           }
-
           $return_items[] = $anItem;
 
       }

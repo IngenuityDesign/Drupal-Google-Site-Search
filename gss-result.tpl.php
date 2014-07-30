@@ -56,6 +56,7 @@
             <h3 class="gss-title media-heading"<?php print $title_attributes; ?>>
                 <?php print $title ?>
             </h3>
+            <?php if ($date): ?><small><?php echo $date ?></small><?php endif ;?>
             <?php if ($snippet) : ?>
                 <p class="gss-search-snippet"<?php print $content_attributes; ?>><?php print $snippet; ?></p>
             <?php endif; ?>
