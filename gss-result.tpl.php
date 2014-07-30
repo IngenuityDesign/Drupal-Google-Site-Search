@@ -46,11 +46,15 @@
  ?>
 <li class="<?php print $classes; ?> media"<?php print $attributes; ?>>
     <a href="<?php print $url ?>">
-        <?php if ($thumbnail_url): ?>
+
         <figure class="pull-left">
+            <?php if ($thumbnail_url): ?>
             <img class="thumbnail gss-thumbnail-image" src="<?php print $thumbnail_url; ?>" width="62"/>
+            <?php else: ?>
+                <div style="width:85px; height:85px;"></div>
+            <?php endif; ?>
         </figure>
-        <?php endif; ?>
+
         <div class="media-body gss-body">
             <?php print render($title_prefix); ?>
             <h3 class="gss-title media-heading"<?php print $title_attributes; ?>>

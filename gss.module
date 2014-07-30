@@ -153,6 +153,17 @@ function gss_search_results($query) {
   // Let other modules add extra parameters.
   $extra = NULL;
   drupal_alter('gss_search_extraparams', $extra);
+
+  if (isset($_GET['sort'])) {
+      //make sure it is proper
+      $sort = $_GET['sort'];
+      if (!in_array($sort, array('date', 'relevance', ''))) {
+          $sort = '';
+      }
+  }
+
+  $extra['sort'] = $sort;
+
   // Make query safe.
   $query = htmlspecialchars($query, ENT_NOQUOTES, 'UTF-8');
   // Init GoogleSiteSearch object.
@@ -220,6 +231,11 @@ function gss_search_results($query) {
 
   return $output;
 }
+
+function gss_preprocess_textfield(&$vars) {
+    $vars['#attributes']['class'][] = 'form-control';
+}
+
 /**
  * Adds custom submit handler for search form.
  */
@@ -230,6 +246,16 @@ function gss_form_alter(&$form, &$form_state, $form_id) {
     case 'search_theme_form':
       $form['#submit'][] = 'gss_search_form_submit';
       $form['#attributes']['class'][] = 'gss';
+      //$form['#attributes']['class'][] = 'form-inline';
+
+      if ($x = &$form['basic']) {
+          $x['#attributes']['class'][] = 'form-group';
+          $x['keys']['#attributes']['class'][] = 'form-control';
+          $x['keys']['#title'] = '';
+      }
+
+      ini_set('display_errors', '1');
+      error_reporting(E_ALL);
       break;
   }
 }
