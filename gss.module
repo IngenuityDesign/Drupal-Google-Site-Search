@@ -140,6 +140,34 @@ $form['gss']['main']['gss_cx_key'] = array(
 
   return $form;
 }
+
+
+
+function get_sorting_keyword() {
+    if (isset($_GET['sort'])) {
+        /* only do this if sort is explictly defined */
+        if ($_GET['sort'] == 'date') $sort = 'date';
+        if ($_GET['sort'] == 'relevance') $sort = 'relevance';
+
+        setcookie('gss_search_sort', $sort, time()+36000, '/', '');
+
+        return $sort;
+
+    } elseif (isset($_COOKIE['gss_search_sort'])) {
+        //cookie is set
+
+        if (in_array($_COOKIE['gss_search_sort'], array('date', 'relevance', ''))) {
+            $sort = $_COOKIE['gss_search_sort'];
+        } else {
+            $sort = '';
+            setcookie('gss_search_sort', '', time()-36000);
+        }
+        return $sort;
+    } else {
+        return '';
+    }
+}
+
 /**
 * Search results page.
 */
@@ -154,14 +182,8 @@ function gss_search_results($query) {
   $extra = NULL;
   drupal_alter('gss_search_extraparams', $extra);
 
-  if (isset($_GET['sort'])) {
-      //make sure it is proper
-      $sort = $_GET['sort'];
-      if (!in_array($sort, array('date', 'relevance', ''))) {
-          $sort = '';
-      }
-  }
 
+  $sort = get_sorting_keyword();
   $extra['sort'] = $sort;
 
   // Make query safe.

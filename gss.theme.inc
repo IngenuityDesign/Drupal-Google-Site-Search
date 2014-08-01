@@ -14,10 +14,15 @@
  *
  * @see gss-result.tpl.php
  */
+error_reporting(E_ALL);
+ini_set('display_errors', TRUE);
+ini_set('display_startup_errors', TRUE);
 function template_preprocess_gss_result(&$variables) {
+
   $result = $variables['result'];
   $variables['url'] = check_url($result['link']);
   $variables['title'] = $result['title'];
+
   // Check for existence. User search does not include snippets.
   $variables['snippet'] = isset($result['snippet']) ? $result['snippet'] : '';
   // Check for existence
@@ -67,6 +72,15 @@ function template_preprocess_gss_result(&$variables) {
   }
 }
 
+function gss_build_param_list($params) {
+    $url = '?';
+    foreach($params as $k=>$v) {
+        $url .= sprintf("%s=%s&", $k, $v);
+    }
+
+    return rtrim($url, '&');
+}
+
 /**
  * Process variables for gss-results.tpl.php.
  *
@@ -77,7 +91,24 @@ function template_preprocess_gss_result(&$variables) {
  * @see gss-results.tpl.php
  */
 function template_preprocess_gss_results(&$variables) {
+
+    $params = array();
+    foreach( $_GET as $param => $value ) {
+        $params[$param] = urlencode(trim($value));
+    }
+
+    unset($params['q']);
+
+    $rel = $params;
+    $rel['sort'] = 'relevance';
+
+    $date = $params;
+    $date['sort'] = 'date';
+    $variables['sorting_date'] = gss_build_param_list($date);
+    $variables['sorting_rel'] = gss_build_param_list($rel);
+
   $results = $variables['results'];
+  $variables['sort'] = get_sorting_keyword();
   $variables['head'] = $results['head'];
   unset($results['head']);
   $variables['pager'] = $results['pager'];
